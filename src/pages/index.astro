@@ -1,5 +1,5 @@
 ---
-
+import BaseLayout from '../layout/BaseLayout.astro';
 ---
 
 <html lang="en">
@@ -11,6 +11,77 @@
 		<title>Astro</title>
 	</head>
 	<body>
-		<h1>Astro</h1>
+
+<BaseLayout title="Home | My Blog">
+  <div class="flex flex-col items-center justify-center py-12 text-center">
+    <h1 class="text-5xl font-extrabold text-gray-900 mb-6">
+      Welcome to <span class="text-blue-600">My Blog</span>
+    </h1>
+    <p class="text-xl text-gray-600 max-w-2xl mb-10">
+      A place to share your thoughts, connect with others, and manage your own content. Create an account below to get started!
+    </p>
+
+    <div class="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 w-full max-w-md text-left">
+      <h2 class="text-2xl font-bold mb-6">Create Account</h2>
+      
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Username</label>
+          <input id="username" type="text" class="w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="johndoe">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Email</label>
+          <input id="email" type="email" class="w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="you@example.com">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Password</label>
+          <input id="password" type="password" class="w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="••••••••">
+        </div>
+        
+        <button id="signUpBtn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition duration-200">
+          Sign Up
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  import { createClient } from '@supabase/supabase-js'
+  
+  
+  const supabase = createClient('https://ximisbmpcyvjxdutrpjb.supabase.co', 'sb_publishable_5A-pOeeAQgMfRBwN35AfKw_QLxg6j4I')
+
+  const signUpBtn = document.querySelector('#signUpBtn');
+
+  signUpBtn?.addEventListener('click', async () => {
+   
+    const email = (document.querySelector('#email') as HTMLInputElement).value;
+    const password = (document.querySelector('#password') as HTMLInputElement).value;
+    const username = (document.querySelector('#username') as HTMLInputElement).value;
+
+    console.log("Button clicked, attempting to sign up...");
+
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { username: username }
+      }
+    });
+
+
+   if (error) {
+      console.error("Supabase Error:", error.message);
+      alert("Noooo!! That's not right!");
+    } else {
+      console.log("Success!", data);
+      alert("Yippeee! Redirecting you to the blog...");
+      window.location.assign('/About');
+    }
+  });
+</script>
+  
+</MainLayout>
 	</body>
 </html>
