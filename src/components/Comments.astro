@@ -1,0 +1,62 @@
+---
+const { postSlug } = Astro.props;
+---
+
+<section class="max-w-2xl mx-auto mt-10 p-5 border-t">
+  <h3 class="font-bold text-xl mb-4">Comments {postSlug}</h3>
+  
+  <textarea id="commentInput" class="w-full p-2 border rounded" placeholder="Type here..."></textarea>
+  <button id="submitBtn" class="bg-blue-600 text-white px-4 py-2 mt-2 rounded">Post</button>
+
+  <div id="commentsList" class="mt-8 space-y-2">
+    </div>
+</section>
+
+<script is:inline define:vars={{ postSlug }}>
+
+  async function initComments() {
+    
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js');
+    const supabase = createClient('https://ximisbmpcyvjxdutrpjb.supabase.co', 'sb_publishable_5A-pOeeAQgMfRBwN35AfKw_QLxg6j4I');
+
+    const btn = document.querySelector('#submitBtn');
+    const input = document.querySelector('#commentInput');
+    const list = document.querySelector('#commentsList');
+
+    console.log("Comments initialized for:", postSlug);
+
+
+    async function load() {
+      const { data, error } = await supabase
+        .from('comments')
+        .select('*')
+        .eq('post_slug', postSlug);
+      
+      if (data) {
+        list.innerHTML = data.map(c => `<div class="p-2 bg-gray-100">${c.content}</div>`).join('');
+      }
+    }
+
+
+    btn.onclick = async () => {
+      console.log("Button clicked!");
+      const { error } = await supabase.from('comments').insert({
+        post_slug: postSlug,
+        content: input.value,
+        username: 'Guest'
+      });
+
+      if (error) {
+        console.error("Supabase error:", error.message);
+        alert("Error: " + error.message);
+      } else {
+        input.value = '';
+        load();
+      }
+    };
+
+    load();
+  }
+
+  initComments();
+</script>
