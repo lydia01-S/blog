@@ -1,4 +1,105 @@
+---
+import BaseLayout from "../layout/BaseLayout.astro";
+---
+<BaseLayout title="Manage Blogs">
+  <div class="max-w-4xl mx-auto p-6 text-black">
+    <div class="bg-white p-6 rounded-xl shadow-md mb-10 border border-gray-200">
+      <h2 id="formTitle" class="text-xl font-bold mb-4">Create New Post</h2>
+      <input type="hidden" id="postId" />
+      <input type="text" id="postTitle" placeholder="Blog Title" class="w-full p-2 border rounded mb-4" />
+      <textarea id="postContent" placeholder="Write content..." class="w-full p-2 border rounded h-40 mb-4"></textarea>
+      
+      <div class="flex items-center">
+        <button id="saveBtn" class="bg-green-600 text-white px-6 py-2 rounded font-bold hover:bg-green-700">Save Post</button>
+        <button id="cancelBtn" class="hidden text-gray-500 ml-4 underline hover:text-black">Cancel Edit</button>
+      </div>
+    </div>
 
+    <h2 class="text-xl font-bold mb-4">Your Published Posts</h2>
+    <div id="userPosts" class="space-y-4">
+      <p class="text-gray-400 italic">Loading your posts...</p>
+    </div>
+  </div>
+
+  <script>
+    import { supabase } from '../supabase.js';
+    declare global {
+      interface Window {
+        deletePost: (id: string) => Promise<void>;
+        editPost: (id: string, title: string, content: string) => void;
+      }
+    }
+
+    const $ = (id: string) => document.querySelector(id);
+    const titleIn = $('#postTitle') as HTMLInputElement;
+    const contentIn = $('#postContent') as HTMLTextAreaElement;
+    const idIn = $('#postId') as HTMLInputElement;
+    const postList = $('#userPosts') as HTMLElement;
+    const formH2 = $('#formTitle') as HTMLElement;
+    const cancelB = $('#cancelBtn') as HTMLButtonElement;
+
+
+    async function loadMyPosts() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        postList.innerHTML = '<p class="text-red-500 font-bold">Please log in to manage blogs.</p>';
+        return;
+      }
+
+      const { data } = await supabase.from('blogs').select('*').eq('author_id', user.id).order('created_at', { ascending: false });
+
+      postList.innerHTML = data?.length 
+        ? data.map((post: any) => `
+          <div class="p-4 bg-gray-50 border rounded-lg flex justify-between items-center">
+            <div>
+              <h3 class="font-bold">${post.title}</h3>
+              <p class="text-xs text-gray-500">${new Date(post.created_at).toLocaleDateString()}</p>
+            </div>
+            <div class="flex gap-4">
+              <button onclick="editPost('${post.id}', \`${post.title}\`, \`${post.content}\` )" class="text-blue-600 font-bold hover:underline">Edit</button>
+              <button onclick="deletePost('${post.id}')" class="text-red-600 font-bold hover:underline">Delete</button>
+            </div>
+          </div>
+        `).join('') 
+        : '<p class="text-gray-400">No posts yet. Start writing above!</p>';
+    }
+
+    $('#saveBtn')?.addEventListener('click', async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return alert("Session expired. Please log in again.");
+
+      const payload = { title: titleIn.value, content: contentIn.value, author_id: user.id, author_name: user.email };
+
+      const query = idIn.value 
+        ? supabase.from('blogs').update(payload).eq('id', idIn.value) 
+        : supabase.from('blogs').insert(payload);
+
+      const { error } = await query;
+      if (error) alert(error.message);
+      else location.reload();
+    });
+
+    window.deletePost = async (id: string) => {
+      if (confirm("Permanently delete this post?")) {
+        await supabase.from('blogs').delete().eq('id', id);
+        loadMyPosts();
+      }
+    };
+
+    window.editPost = (id, title, content) => {
+      idIn.value = id;
+      titleIn.value = title;
+      contentIn.value = content;
+      formH2.innerText = "Edit Post";
+      cancelB.classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    cancelB.onclick = () => location.reload();
+
+    loadMyPosts();
+  </script>
+</BaseLayout>
 
 
 

@@ -1,0 +1,60 @@
+---
+import BaseLayout from "../layout/BaseLayout.astro";
+---
+
+<BaseLayout title="Create a New Post">
+  <section class="max-w-2xl mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6">Create New Blog Post</h1>
+    
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Title</label>
+        <input type="text" id="postTitle" class="w-full p-2 border rounded mt-1" placeholder="Enter title..." />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Content</label>
+        <textarea id="postContent" rows="10" class="w-full p-2 border rounded mt-1" placeholder="Write your story..."></textarea>
+      </div>
+
+      <button id="submitPostBtn" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
+        Publish Post
+      </button>
+      
+      <p id="statusMessage" class="mt-4 text-sm"></p>
+    </div>
+  </section>
+
+  <script>
+    import { supabase } from '../supabase.js';
+
+    const submitBtn = document.querySelector('#submitPostBtn');
+    const titleInput = document.querySelector('#postTitle') as HTMLInputElement;
+    const contentInput = document.querySelector('#postContent') as HTMLTextAreaElement;
+    const statusMsg = document.querySelector('#statusMessage');
+
+    submitBtn?.addEventListener('click', async () => {
+      const title = titleInput.value.trim();
+      const content = contentInput.value.trim();
+
+      if (!title || !content) {
+        alert("Please fill in both the title and content.");
+        return;
+      }
+
+   
+      const { data: { user } } = await supabase.auth.getUser();
+    
+      (submitBtn as HTMLButtonElement).disabled = true;
+     
+
+      const { error } = await supabase
+        .from('blogs')
+        .insert({
+          title: title,
+          content: content,
+          author_id: user.id 
+        });
+    });
+  </script>
+</BaseLayout>

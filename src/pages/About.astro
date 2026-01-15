@@ -1,11 +1,15 @@
 ---
 import BaseLayout from "../layout/BaseLayout.astro";
+import Comments from "../components/Comments.astro"
 const allPosts = await Astro.glob('./posts/*.md');
 const frontmatter = Astro.props;
-import Comments from "../components/Comments.astro"
+
 ---
 
+
+
 <BaseLayout title="Blog">
+
   <div class="max-w-6xl mx-auto px-4 py-12">
     <header class="mb-12 text-center">
       <h1 class="text-4xl font-extrabold text-gray-900 sm:text-5xl mb-4">
@@ -23,7 +27,7 @@ import Comments from "../components/Comments.astro"
 
 <div class="p-6 flex-grow">
             <h2 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-              {frontmatter.title || "Untitled Post"}
+              {frontmatter.title || "Writing a new story!"}
             </h2>
             <p class="text-gray-600 line-clamp-2 text-sm mb-4">
               {frontmatter.description || "Read more about this post and explore the details inside..."}
@@ -44,7 +48,7 @@ import Comments from "../components/Comments.astro"
 
 <div class="p-6 flex-grow">
             <h2 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-              {frontmatter.title || "Untitled Post"}
+              {frontmatter.title || "28 years later review!"}
             </h2>
             <p class="text-gray-600 line-clamp-2 text-sm mb-4">
               {frontmatter.description || "Read more about this post and explore the details inside..."}
@@ -65,7 +69,7 @@ import Comments from "../components/Comments.astro"
 
 <div class="p-6 flex-grow">
             <h2 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-              {frontmatter.title || "Untitled Post"}
+              {frontmatter.title || "Screenwriting rules are dumb"}
             </h2>
             <p class="text-gray-600 line-clamp-2 text-sm mb-4">
               {frontmatter.description || "Read more about this post and explore the details inside..."}
@@ -84,7 +88,7 @@ import Comments from "../components/Comments.astro"
 
 <div class="p-6 flex-grow">
             <h2 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-              {frontmatter.title || "Untitled Post"}
+              {frontmatter.title || "Im learning bass!"}
             </h2>
             <p class="text-gray-600 line-clamp-2 text-sm mb-4">
               {frontmatter.description || "Read more about this post and explore the details inside..."}
@@ -97,15 +101,13 @@ import Comments from "../components/Comments.astro"
         </a>
     
 
-    
-     
         <a href={"/posts/Post-5/"} class="group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col">
           <div class="h-40 bg-gradient-to-br from-indigo-500 to-pink-600 flex items-center justify-center">
           </div>
 
 <div class="p-6 flex-grow">
             <h2 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-              {frontmatter.title || "Untitled Post"}
+              {frontmatter.title || "New years resolutions!"}
             </h2>
             <p class="text-gray-600 line-clamp-2 text-sm mb-4">
               {frontmatter.description || "Read more about this post and explore the details inside..."}
@@ -116,7 +118,7 @@ import Comments from "../components/Comments.astro"
             </div>
           </div>
         </a>
- 
+
 <Comments />
     </BaseLayout>
 </body>

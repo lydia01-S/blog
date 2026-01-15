@@ -45,43 +45,40 @@ import BaseLayout from '../layout/BaseLayout.astro';
     </div>
   </div>
 
-  <script>
-  import { createClient } from '@supabase/supabase-js'
-  
-  
-  const supabase = createClient('https://ximisbmpcyvjxdutrpjb.supabase.co', 'sb_publishable_5A-pOeeAQgMfRBwN35AfKw_QLxg6j4I')
-
-  const signUpBtn = document.querySelector('#signUpBtn');
+<script>
+  import { supabase } from '../supabase.js';
+  const $ = (id: string) => document.querySelector(id) as HTMLInputElement;
+  const signUpBtn = $('#signUpBtn');
 
   signUpBtn?.addEventListener('click', async () => {
-   
-    const email = (document.querySelector('#email') as HTMLInputElement).value;
-    const password = (document.querySelector('#password') as HTMLInputElement).value;
-    const username = (document.querySelector('#username') as HTMLInputElement).value;
+    const email = $('#email').value;
+    const password = $('#password').value;
+    const username = $('#username').value;
 
-    console.log("Button clicked, attempting to sign up...");
+    console.log("Attempting sign up for:", username);
 
-
+    
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { username: username }
+        data: { username }
       }
     });
 
 
-   if (error) {
+    if (error) {
       console.error("Supabase Error:", error.message);
-      alert("Noooo!! That's not right!");
+      alert("Noooo!! That's not right: " + error.message);
     } else {
       console.log("Success!", data);
       alert("Yippeee! Redirecting you to the blog...");
-      window.location.assign('/About');
+      
+      window.location.assign('/About'); 
     }
   });
 </script>
   
-</MainLayout>
+</BaseLayout>
 	</body>
 </html>
