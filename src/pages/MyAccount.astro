@@ -2,59 +2,90 @@
 import BaseLayout from "../layout/BaseLayout.astro";
 ---
 
-<BaseLayout title="Create a New Post">
-  <section class="max-w-2xl mx-auto p-6">
-    <h1 class="text-3xl font-bold mb-6">Create New Blog Post</h1>
+<BaseLayout title="My Account">
+  <section class="max-w-md mx-auto p-8 mt-10 bg-white rounded-2xl shadow-sm border border-gray-100 font-playful">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">Account Settings</h1>
     
-    <div class="space-y-4">
+    <div id="loadingState" class="text-gray-500 italic">Loading your profile...</div>
+
+    <div id="accountForm" class="hidden space-y-6">
       <div>
-        <label class="block text-sm font-medium text-gray-700">Title</label>
-        <input type="text" id="postTitle" class="w-full p-2 border rounded mt-1" placeholder="Enter title..." />
+        <label class="block text-sm font-semibold text-gray-600 mb-2">Email Address</label>
+        <input type="text" id="userEmail" disabled class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-400 cursor-not-allowed" />
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700">Content</label>
-        <textarea id="postContent" rows="10" class="w-full p-2 border rounded mt-1" placeholder="Write your story..."></textarea>
+        <label class="block text-sm font-semibold text-gray-600 mb-2">Display Username</label>
+        <input type="text" id="usernameInput" class="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none transition" />
       </div>
 
-      <button id="submitPostBtn" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
-        Publish Post
+      <button id="updateProfileBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all shadow-md active:scale-95">
+        Save Changes
       </button>
-      
-      <p id="statusMessage" class="mt-4 text-sm"></p>
+
+      <div class="pt-6 border-t border-gray-100">
+        <button id="logoutBtn" class="text-red-500 hover:text-red-700 font-medium transition">
+          Log Out
+        </button>
+      </div>
     </div>
   </section>
 
   <script>
     import { supabase } from '../supabase.js';
 
-    const submitBtn = document.querySelector('#submitPostBtn');
-    const titleInput = document.querySelector('#postTitle') as HTMLInputElement;
-    const contentInput = document.querySelector('#postContent') as HTMLTextAreaElement;
-    const statusMsg = document.querySelector('#statusMessage');
+    const loadingState = document.querySelector('#loadingState');
+    const accountForm = document.querySelector('#accountForm');
+    const usernameInput = document.querySelector('#usernameInput') as HTMLInputElement;
+    const userEmail = document.querySelector('#userEmail') as HTMLInputElement;
+    const updateBtn = document.querySelector('#updateProfileBtn');
+    const logoutBtn = document.querySelector('#logoutBtn');
 
-    submitBtn?.addEventListener('click', async () => {
-      const title = titleInput.value.trim();
-      const content = contentInput.value.trim();
-
-      if (!title || !content) {
-        alert("Please fill in both the title and content.");
-        return;
-      }
-
-   
-      const { data: { user } } = await supabase.auth.getUser();
+    async function loadProfile() {
     
-      (submitBtn as HTMLButtonElement).disabled = true;
-     
+      const { data: { user } } = await supabase.auth.getUser();
 
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', user.id)
+        .single();
+
+      if (profile) {
+        userEmail.value = user.email || '';
+        usernameInput.value = profile.username || '';
+        loadingState?.classList.add('hidden');
+        accountForm?.classList.remove('hidden');
+      }
+    }
+
+    updateBtn?.addEventListener('click', async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      const newUsername = usernameInput.value.trim();
+
+      if (!user || !newUsername) return;
+
+      (updateBtn as HTMLButtonElement).disabled = true;
+      
       const { error } = await supabase
-        .from('blogs')
-        .insert({
-          title: title,
-          content: content,
-          author_id: user.id 
-        });
+        .from('profiles')
+        .update({ username: newUsername })
+        .eq('id', user.id); 
+
+      if (error) {
+        alert("Error updating: " + error.message);
+      } else {
+        alert("Profile updated successfully! ✨");
+      }
+      (updateBtn as HTMLButtonElement).disabled = false;
     });
+
+    
+    logoutBtn?.addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = '/';
+    });
+
+    loadProfile();
   </script>
 </BaseLayout>
